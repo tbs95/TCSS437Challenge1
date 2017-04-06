@@ -6,46 +6,76 @@
 
 task main()
 {
-	int highPowerMin = 75;
-	int highPowerMax = 100;
-	int lowPowerMin = 40;
-	int lowPowerMax = 60;
+	int highPowerMin = 50;
+	int highPowerMax = 80;
+	int lowPowerMin = 0;
+	int lowPowerMax = 10;
+	int minWalkTime = 10000;
+	int maxWalkTime = 30000;
 	srand(nSysTime);
 	while (true)
 	{
 		// Turn the LED red if the touch sensor is pressed
-		if (getTouchValue(S1) == 1 && getTouchValue(S2) == 1)
-		{
-			setLEDColor(ledRed);
-			motor[motorA] = -(random(highPowerMax-highPowerMin) + highPowerMin);
-			motor[motorB] = -(random(highPowerMax-highPowerMin) + highPowerMin);
-			sleep(1000);
+		if(getTouchValue(S1) == 1 || getTouchValue(S2) == 1) {
+			sleep(150);
+			if (getTouchValue(S1) == 1 && getTouchValue(S2) == 1)
+			{
+				//setLEDColor(ledRed);
+				playSound(soundBeepBeep);
+				motor[motorA] = -(highPowerMax);
+				motor[motorB] = -(highPowerMax);
+				sleep(500);
+
+				motor[motorA] = 0;
+				motor[motorB] = 0;
+				sleep(2000);
+
+				int power = (random(highPowerMax-highPowerMin) + highPowerMin); // random(60 - 40) + 40 == 40 to 60
+
+				//motor[motorA] = -(random(highPowerMax-highPowerMin) + highPowerMin); // -(random(100-75) +75) = -(75 to 100)
+				//motor[motorB] = -(random(highPowerMax-highPowerMin) + highPowerMin); // -(random(100-75) +75) = -(75 to 100)
+ 				if(random(1) == 0){
+ 					motor[motorA] = power;
+					motor[motorB] = -power;
+				} else {
+					motor[motorA] = -power;
+					motor[motorB] = power;
+				}
+				sleep(250);
+			}
+			else if (getTouchValue(S1) == 1)
+			{
+				// setLEDColor(ledRed);
+				motor[motorB] = -(random(lowPowerMax-lowPowerMin) + lowPowerMin);
+				motor[motorA] = -(random(highPowerMax-highPowerMin) + highPowerMin);
+				writeDebugStreamLine("%d, %d", motor[motorA], motor[motorB]);
+				sleep(random(500) + 250);
+			}
+			else if (getTouchValue(S2) == 1)
+			{
+				// setLEDColor(ledRed);
+				motor[motorB] = -(random(highPowerMax-highPowerMin) + highPowerMin);
+				motor[motorA] = -(random(lowPowerMax-lowPowerMin) + lowPowerMin);
+				sleep(random(500) + 250);
+			}
+			// If it's in a released state, turn the LED green
 		}
-		else if (getTouchValue(S1) == 1)
-		{
-			setLEDColor(ledRed);
-			motor[motorA] = -(random(lowPowerMax-lowPowerMin) + lowPowerMin);
-			motor[motorB] = -(random(highPowerMax-highPowerMin) + highPowerMin);
-			writeDebugStreamLine("%d, %d", motor[motorA], motor[motorB]);
-			sleep(1000);
-		}
-		else if (getTouchValue(S2) == 1)
-		{
-			setLEDColor(ledRed);
-			motor[motorA] = -(random(highPowerMax-highPowerMin) + highPowerMin);
-			motor[motorB] = -(random(lowPowerMax-lowPowerMin) + lowPowerMin);
-			sleep(1000);
-		}
-		// If it's in a released state, turn the LED green
 		else
 		{
 			// Drunken Sailor Walk will go here
 			setLEDColor(ledGreen);
 			motor[motorA] = random(highPowerMax-highPowerMin) + highPowerMin;
 			motor[motorB] = random(highPowerMax-highPowerMin) + highPowerMin;
-			sleep(250);
+			int counter = random(maxWalkTime - minWalkTime)+ minWalkTime;
+			while(counter > 0) {
+				if(getTouchValue(S1) == 1 || getTouchValue(S2) == 1) {
+					counter = 0;
+				} else {
+					counter--;
+				}
+			}
 		}
 		//Loop to monitor value in Sensor debugger window
-		sleep(50);
+		// sleep(50);
 	}
 }
